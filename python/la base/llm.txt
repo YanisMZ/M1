@@ -1,0 +1,4 @@
+
+commande pour lancer llm:
+
+ollama run llama3.2

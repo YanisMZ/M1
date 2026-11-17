@@ -1,175 +1,131 @@
-import math
+
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import datasets
 
 
+# EXERCICE 1
 
-def test():
-    a = 0
-    return a
+votes = pd.read_csv("house-votes-84.csv")
 
-
-def crypt(message, key):
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    result = ""
-
-    for char in message:
-        if char in alphabet:
-            idx = (alphabet.index(char) + key) % len(alphabet)
-            result += alphabet[idx]
-        else:
-            result += char
-
-    return result
+print(votes.head())
+votes.info()
+print(votes.describe(include="all"))
 
 
-def decrypt(message, key):
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    result = ""
+# EXERCICE 2
 
-    for char in message:
-        if char in alphabet:
-            idx = (alphabet.index(char) - key) % len(alphabet)
-            result += alphabet[idx]
-        else:
-            result += char
+variables = ["education", "missile", "satellite"]
 
-    return result
-
-
-def exercise4():
-    print("\n========== EXERCICE 4 ==========")
-
-    texte = "python"
-
-    resultat = crypt(texte, 10)
-
-    print("Texte original :", texte)
-    print("Texte chiffré  :", resultat)
-
-    # Vérification du déchiffrement
-    print("Texte déchiffré :", decrypt(resultat, 10))
+for colonne in variables:
+    plt.figure(figsize=(7, 4))
+    sns.countplot(data=votes, x=colonne, hue="party", palette="Set2")
+    plt.title("Répartition des votes : " + colonne)
+    plt.xlabel("Réponse")
+    plt.ylabel("Nombre de personnes")
+    plt.tight_layout()
+    plt.show()
 
 
+# EXERCICE 3
 
-def exercise5():
-    print("\n========== EXERCICE 5 ==========")
+donnees = votes.drop("party", axis=1)
+classes = votes["party"]
 
-    chaine = "StRing ObJEcTs haVe mANY inTEREsting PROPErties!"
+donnees = pd.get_dummies(donnees)
+donnees = donnees.fillna(0)
 
-   
-    mots = chaine.split()
-
-    print("Liste de mots :", mots)
-
-    mots[0] = mots[0].lower()
-    mots[1] = mots[1].upper()
-    mots[2] = mots[2].lower()
-    mots[3] = mots[3].upper()
-    mots[4] = mots[4].lower()
-    mots[5] = mots[5].upper()
-
-    print("Liste modifiée :", mots)
-
-    # Joindre les mots pour créer une nouvelle chaîne
-    nouvelle_chaine = " ".join(mots)
-
-    print("Nouvelle chaîne :", nouvelle_chaine)
+modele = KNeighborsClassifier(n_neighbors=6)
+modele.fit(donnees, classes)
 
 
+# EXERCICE 4
 
-def exercise6():
-    print("\n========== EXERCICE 6 ==========")
+resultats = modele.predict(donnees)
 
-    df = pd.read_csv("heroes.csv")
+print(resultats[:10])
 
-    print("Avant correction :")
-    print(df[["name", "Gender", "Hair color"]].head())
+nouveau_vote = pd.DataFrame(
+    np.random.randint(0, 2, size=(1, donnees.shape[1])),
+    columns=donnees.columns
+)
 
-  
-    df["Hair color"] = df["Hair color"].str.lower()
+prediction = modele.predict(nouveau_vote)
 
-
-    df["Gender"] = df["Gender"].replace("Fmale", "Female")
-
-    print("\nAprès correction :")
-    print(df[["name", "Gender", "Hair color"]].head())
-
-    print("\nNombre de 'Fmale' restant :",
-          (df["Gender"] == "Fmale").sum())
+print("Prédiction :", prediction[0])
 
 
+# EXERCICE 5
+
+chiffres = datasets.load_digits()
+
+print(chiffres.keys())
+print(chiffres.DESCR)
+
+print(chiffres.images.shape)
+print(chiffres.data.shape)
+
+plt.figure(figsize=(4, 4))
+plt.imshow(chiffres.images[10], cmap="gray")
+plt.axis("off")
+plt.show()
 
 
-def main():
+# EXERCICE 6
 
-    print("\n========== EXERCICE 1 ==========")
-    basket1 = [
-        'banana', 'kiwifruits', 'grapefruits', 'apples',
-        'apricots', 'nectarines', 'oranges', 'peaches',
-        'pears', 'lemons'
-    ]
+images = chiffres.data
+etiquettes = chiffres.target
 
-    basket2 = [
-        'apples', 'grapes', 'apricots', 'dragonfruits',
-        'peaches', 'pears', 'limes', 'papaya'
-    ]
+X_train, X_test, y_train, y_test = train_test_split(
+    images,
+    etiquettes,
+    test_size=0.2,
+    random_state=42
+)
 
-    for fruit in basket1:
-        if fruit in basket2:
-            basket2.remove(fruit)
+classificateur = KNeighborsClassifier(n_neighbors=7)
+classificateur.fit(X_train, y_train)
 
-    print(basket2)
+precision = classificateur.score(X_test, y_test)
 
-    # Tant que basket2 a strictement moins d'éléments que basket1
-    while len(basket2) <= len(basket1):
-        fruit = basket1.pop()
-        basket2.append(fruit)
-
-    print(basket2)
-    print(basket1)
+print("Précision :", precision)
 
 
-    print("\n========== EXERCICE 2 ==========")
-    A = {1, 2, 3, 4, 5, 6, 7}
-    B = {5, 7, 9, 11, 13, 15}
-    C = {1, 2, 8, 10, 11, 12, 13, 14, 15, 16, 17}
-    D = {1, 3, 5, 7, 9, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
-    E = {9, 10, 11, 12, 13, 14, 15}
+# EXERCICE 7
 
-    resultat1 = D.intersection(E)
-    resultat2 = B.intersection(C)
-    resultat3 = A.union(resultat2)
+precision_train = []
+precision_test = []
 
-    total = resultat3.difference(resultat1)
+voisins = range(1, 10)
 
-    print(total)
+for k in voisins:
+    classificateur = KNeighborsClassifier(n_neighbors=k)
+    classificateur.fit(X_train, y_train)
 
-    print("\n========== EXERCICE 3 ==========")
-    range_x = [
-        0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
-        1.2, 1.4, 1.6, 1.8, 2.0
-    ]
-
-    range_y = [
-        0.0, 0.2, 0.4, 0.6, 0.8, 1.0,
-        1.2, 1.4, 1.6, 1.8, 2.0
-    ]
-
-    circ_parab = dict()
-
-    for x in range_x:
-        for y in range_y:
-            z = math.sqrt(x**2 + y**2)
-            circ_parab[(x, y)] = z
-
-    print(circ_parab[(1.4, 1.8)])
+    precision_train.append(classificateur.score(X_train, y_train))
+    precision_test.append(classificateur.score(X_test, y_test))
 
 
+plt.figure(figsize=(8, 5))
 
-if __name__ == '__main__':
-    test()
-    main()
+plt.plot(voisins, precision_train, marker="o", label="Apprentissage")
+plt.plot(voisins, precision_test, marker="s", label="Test")
 
-    exercise4()
-    exercise5()
-    exercise6()
+plt.xlabel("Nombre de voisins")
+plt.ylabel("Précision")
+plt.title("Résultats du KNN")
+plt.xticks(list(voisins))
+plt.legend()
+plt.grid()
+plt.tight_layout()
+plt.show()
+
+meilleur_k = list(voisins)[np.argmax(precision_test)]
+
+print("Meilleur K :", meilleur_k)
+print("Meilleure précision :", max(precision_test))
